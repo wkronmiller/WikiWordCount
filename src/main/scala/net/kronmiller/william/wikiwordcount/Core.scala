@@ -7,6 +7,9 @@ import scala.collection.parallel.immutable.ParSeq
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 
+import scala.util.Failure
+import scala.util.Success
+
 class XMLLoader(xmlPath: String) {
   def load = {
     Source
@@ -19,7 +22,7 @@ class XMLLoader(xmlPath: String) {
 object Core {
   val NUM_SLICES = 30
   private val textRegex = "\\<text xml\\:space=\"preserve\"\\>(.*)\\</text\\>".r
-  private val wordRegex = "[a-zA-Z\\']+"
+  private val wordRegex = "([a-zA-Z\\']+)".r
   def getWords(source: String) = {
     textRegex
       .findAllIn(source)
@@ -34,9 +37,9 @@ object Core {
 
     sc.textFile(xmlPath, NUM_SLICES)
       .flatMap(_.split("\\s+"))
-      .map(textRegex.findFirstIn(_))
-      .filter(_.isDefined)
-      .map(_.get)
+      .map(_.trim)
+      .map(wordRegex.findFirstIn(_))
+      .filter(_.isDefined).map(_.get)
       .map(_.replace("''", ""))
       .filter(_.length > 0)
       .map((_, 1)).reduceByKey(_ + _)
