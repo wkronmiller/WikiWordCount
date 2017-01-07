@@ -21,12 +21,7 @@ class XMLLoader(xmlPath: String) {
 
 object Core {
   val NUM_SLICES = 30
-  private val textRegex = "\\<text xml\\:space=\"preserve\"\\>(.*)\\</text\\>".r
   private val wordRegex = "([a-zA-Z\\']+)".r
-  def getWords(source: String) = {
-    textRegex
-      .findAllIn(source)
-  }
 
   def main(args: Array[String]) {
     val Array(xmlPath) = args
