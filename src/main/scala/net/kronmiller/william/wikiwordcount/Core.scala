@@ -17,27 +17,6 @@ trait Counter {
   protected val splitRegex = "\\s+"
 }
 
-object SparkCore extends Counter {
-  def main(args: Array[String]) {
-    val Array(xmlPath) = args
-    val sparkConf = new SparkConf().setMaster("local[*]").setAppName("wikiwordcount")
-    val sc = new SparkContext(sparkConf)
-
-    sc.textFile(xmlPath, NUM_SLICES)
-      .flatMap(_.split(splitRegex))
-      .map(_.trim)
-      .map(wordRegex.findFirstIn(_))
-      .filter(_.isDefined).map(_.get)
-      .map(_.replace("''", ""))
-      .filter(_.length > 0)
-      .map((_, 1))
-      .reduceByKey(_ + _)
-      .saveAsTextFile("counts")
-
-    sc.stop
-  }
-}
-
 class ConcurrentCounter[T] {
   private val countMap = scala.collection.mutable.Map[T, Int]()
   def increment(key: T) {
@@ -117,6 +96,6 @@ object VanillaCore extends Counter {
     pool.awaitTermination(10, TimeUnit.HOURS)
     println("All mappers finished")
     
-    counter.saveToFile(new File("counts.txt")
+    counter.saveToFile(new File("counts.txt"))
   }
 }
