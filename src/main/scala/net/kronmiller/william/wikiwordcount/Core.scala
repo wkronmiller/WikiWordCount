@@ -23,21 +23,18 @@ object Core {
   def getWords(source: String) = {
     textRegex
       .findAllIn(source)
-      .toList
   }
 
   def main(args: Array[String]) {
     val Array(xmlPath) = args
     println("Loading text")
     val loader = new XMLLoader(xmlPath)
-    println("Flatmapping words")
-    val parWords: List[String] = getWords(loader.load)
-    println("Starting spark")
-
     val sparkConf = new SparkConf().setMaster("local[*]").setAppName("wikiwordcount")
     val sc = new SparkContext(sparkConf)
 
-    sc.parallelize[String](parWords, NUM_SLICES)
+    sc.parallelize[String](Seq(loader.load), NUM_SLICES)
+      .flatMap(textRegex.findAllIn(_))
+      .repartition(NUM_SLICES)
       .map(text => {
         val textRegex(isolatedText) = text
         isolatedText
