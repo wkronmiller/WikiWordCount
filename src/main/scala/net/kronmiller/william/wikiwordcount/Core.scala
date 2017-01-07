@@ -42,7 +42,8 @@ object Core {
       .filter(_.isDefined).map(_.get)
       .map(_.replace("''", ""))
       .filter(_.length > 0)
-      .map((_, 1)).reduceByKey(_ + _)
+      .map((_, 1))
+      .reduceByKey(_ + _)
       .saveAsTextFile("counts")
 
     sc.stop
