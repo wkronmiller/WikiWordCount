@@ -7,26 +7,12 @@ import scala.collection.parallel.immutable.ParSeq
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 
-import scala.util.Failure
-import scala.util.Success
-
-class XMLLoader(xmlPath: String) {
-  def load = {
-    Source
-      .fromFile(new File(xmlPath))
-      .getLines
-      .mkString(" ")
-  }
-}
-
 object Core {
   val NUM_SLICES = 30
   private val wordRegex = "([a-zA-Z\\']+)".r
 
   def main(args: Array[String]) {
     val Array(xmlPath) = args
-    println("Loading text")
-    val loader = new XMLLoader(xmlPath)
     val sparkConf = new SparkConf().setMaster("local[*]").setAppName("wikiwordcount")
     val sc = new SparkContext(sparkConf)
 
