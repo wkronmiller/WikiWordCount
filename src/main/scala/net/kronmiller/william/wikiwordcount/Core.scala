@@ -32,18 +32,15 @@ object Core {
     val sparkConf = new SparkConf().setMaster("local[*]").setAppName("wikiwordcount")
     val sc = new SparkContext(sparkConf)
 
-    sc.parallelize[String](Seq(loader.load), NUM_SLICES)
-      .flatMap(textRegex.findAllIn(_))
-      .repartition(NUM_SLICES)
-      .map(text => {
-        val textRegex(isolatedText) = text
-        isolatedText
-      })
-      .flatMap(_.split("\\s+").toList)
-      .filter(_.matches(wordRegex))
+    sc.textFile(xmlPath, NUM_SLICES)
+      .flatMap(_.split("\\s+"))
+      .map(textRegex.findFirstIn(_))
+      .filter(_.isDefined)
+      .map(_.get)
       .map(_.replace("''", ""))
       .filter(_.length > 0)
-      .map((_, 1)).reduceByKey(_ + _).saveAsTextFile("counts")
+      .map((_, 1)).reduceByKey(_ + _)
+      .saveAsTextFile("counts")
 
     sc.stop
   }
